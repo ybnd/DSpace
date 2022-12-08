@@ -22,6 +22,7 @@ import org.dspace.identifier.VersionedHandleIdentifierProviderWithCanonicalHandl
 import org.dspace.services.ConfigurationService;
 import org.dspace.services.factory.DSpaceServicesFactory;
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -36,6 +37,7 @@ public class CreateMissingIdentifiersIT
     private static final String TASK_NAME = "test";
 
     @Test
+    @Ignore
     public void testPerform()
             throws IOException {
         ConfigurationService configurationService
