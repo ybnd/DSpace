@@ -147,26 +147,6 @@ public class DescribeStep extends AbstractProcessingStep {
                         }
                     }
                 }
-
-                if (input.isRelationshipField() && isBlank(input.getFieldName())) {
-                    Item item = obj.getItem();
-                    String key = "relationship." + input.getRelationshipType();
-                    if (isEmpty(data.getMetadata().get(key))) {
-                        data.getMetadata().put(key, new ArrayList<>());
-                    }
-                    for (RelationshipMetadataValue metadataValue :
-                        relationshipMetadataService.getRelationshipMetadata(item, true)) {
-                        if (metadataValue.getMetadataField().getElement().equals(input.getRelationshipType())) {
-                            MetadataValueRest dto = new MetadataValueRest();
-                            dto.setAuthority(metadataValue.getAuthority());
-                            dto.setConfidence(metadataValue.getConfidence());
-                            dto.setLanguage(metadataValue.getLanguage());
-                            dto.setPlace(metadataValue.getPlace());
-                            dto.setValue(metadataValue.getValue());
-                            data.getMetadata().get(key).add(dto);
-                        }
-                    }
-                }
             }
         }
     }
