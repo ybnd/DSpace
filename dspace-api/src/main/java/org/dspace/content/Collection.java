@@ -93,9 +93,6 @@ public class Collection extends DSpaceObject implements DSpaceObjectLegacySuppor
     )
     private final Set<Community> communities = new HashSet<>();
 
-    @Transient
-    private transient CollectionService collectionService;
-
     /**
      * Protected constructor, create object using:
      * {@link org.dspace.content.service.CollectionService#create(Context, Community)}
@@ -114,13 +111,6 @@ public class Collection extends DSpaceObject implements DSpaceObjectLegacySuppor
      */
     protected Collection(UUID uuid) {
         this.predefinedUUID = uuid;
-    }
-
-    @Override
-    public String getName() {
-        String value = getCollectionService()
-            .getMetadataFirstValue(this, MetadataSchemaEnum.DC.getName(), "title", null, Item.ANY);
-        return value == null ? "" : value;
     }
 
     /**
@@ -185,53 +175,6 @@ public class Collection extends DSpaceObject implements DSpaceObjectLegacySuppor
     void setAdmins(Group admins) {
         this.admins = admins;
         setModified();
-    }
-
-    // FIXME this should be moved to the collectionService or completely removed, see also
-    // https://jira.duraspace.org/browse/DS-3041
-    public Group getWorkflowStep1(Context context) {
-        return getCollectionService().getWorkflowGroup(context, this, 1);
-    }
-
-    // FIXME this should be moved to the collectionService or completely removed, see also
-    // https://jira.duraspace.org/browse/DS-3041
-    public Group getWorkflowStep2(Context context) {
-        return getCollectionService().getWorkflowGroup(context, this, 2);
-    }
-
-    // FIXME this should be moved to the collectionService or completely removed, see also
-    // https://jira.duraspace.org/browse/DS-3041
-    public Group getWorkflowStep3(Context context) {
-        return getCollectionService().getWorkflowGroup(context, this, 3);
-    }
-
-    /**
-     * Get the license that users must grant before submitting to this
-     * collection.
-     *
-     * @return the license for this collection. Never null.
-     */
-    @Nonnull
-    public String getLicenseCollection() {
-        String license = getCollectionService()
-                .getMetadataFirstValue(this, CollectionService.MD_LICENSE, Item.ANY);
-        if (null == license) {
-            return "";
-        } else {
-            return license;
-        }
-    }
-
-    /**
-     * Set the license for this collection. Passing in <code>null</code> means
-     * that the site-wide default will be used.
-     *
-     * @param context context
-     * @param license the license, or <code>null</code>
-     * @throws SQLException if database error
-     */
-    public void setLicense(Context context, String license) throws SQLException {
-        getCollectionService().setMetadataSingleValue(context, this, MD_LICENSE, Item.ANY, license);
     }
 
     /**
@@ -320,34 +263,9 @@ public class Collection extends DSpaceObject implements DSpaceObjectLegacySuppor
         return Constants.COLLECTION;
     }
 
-    public void setWorkflowGroup(Context context, int step, Group g)
-        throws SQLException, AuthorizeException {
-        getCollectionService().setWorkflowGroup(context, this, step, g);
-    }
-
     @Override
     public Integer getLegacyId() {
         return legacyId;
-    }
-
-    private CollectionService getCollectionService() {
-        if (collectionService == null) {
-            collectionService = ContentServiceFactory.getInstance().getCollectionService();
-        }
-        return collectionService;
-    }
-
-    /**
-     * return count of the collection items
-     *
-     * @return int
-     */
-    public int countArchivedItems() {
-        try {
-            return collectionService.countArchivedItems(this);
-        } catch (ItemCountException e) {
-            throw new RuntimeException(e);
-        }
     }
 
 }

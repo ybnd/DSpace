@@ -30,9 +30,6 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Table(name = "site")
 public class Site extends DSpaceObject {
 
-    @Transient
-    private transient SiteService siteService;
-
     /**
      * Protected constructor, create object using:
      * {@link org.dspace.content.service.SiteService#createSite(Context)}
@@ -51,22 +48,10 @@ public class Site extends DSpaceObject {
         return Constants.SITE;
     }
 
-    @Override
-    public String getName() {
-        return getSiteService().getName(this);
-    }
-
     public String getURL() {
         ConfigurationService configurationService
                 = DSpaceServicesFactory.getInstance().getConfigurationService();
         return configurationService.getProperty("dspace.ui.url");
-    }
-
-    private SiteService getSiteService() {
-        if (siteService == null) {
-            siteService = ContentServiceFactory.getInstance().getSiteService();
-        }
-        return siteService;
     }
 
 }

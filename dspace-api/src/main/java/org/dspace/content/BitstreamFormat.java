@@ -82,9 +82,6 @@ public class BitstreamFormat implements Serializable, ReloadableEntity<Integer> 
     @Cascade( {org.hibernate.annotations.CascadeType.ALL, org.hibernate.annotations.CascadeType.DELETE_ORPHAN})
     private List<String> fileExtensions;
 
-    @Transient
-    private transient BitstreamFormatService bitstreamFormatService;
-
     /**
      * The "unknown" support level - for bitstream formats that are unknown to
      * the system
@@ -235,26 +232,6 @@ public class BitstreamFormat implements Serializable, ReloadableEntity<Integer> 
      */
     public void setExtensions(List<String> exts) {
         this.fileExtensions = exts;
-    }
-
-        /*
-        Getters & setters which should be removed on the long run, they are just here to provide all getters &
-        setters to the item object
-    */
-
-    public void setShortDescription(Context context, String s) throws SQLException {
-        getBitstreamFormatService().setShortDescription(context, this, s);
-    }
-
-    public void setSupportLevel(int sl) {
-        getBitstreamFormatService().setSupportLevel(this, sl);
-    }
-
-    private BitstreamFormatService getBitstreamFormatService() {
-        if (bitstreamFormatService == null) {
-            bitstreamFormatService = ContentServiceFactory.getInstance().getBitstreamFormatService();
-        }
-        return bitstreamFormatService;
     }
 
     /**

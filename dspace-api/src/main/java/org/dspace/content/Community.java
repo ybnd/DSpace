@@ -78,8 +78,6 @@ public class Community extends DSpaceObject implements DSpaceObjectLegacySupport
     @JoinColumn(name = "logo_bitstream_id")
     private Bitstream logo = null;
 
-    @Transient
-    protected transient CommunityService communityService;
 
     /**
      * Protected constructor, create object using:
@@ -247,34 +245,8 @@ public class Community extends DSpaceObject implements DSpaceObjectLegacySupport
     }
 
     @Override
-    public String getName() {
-        String value = getCommunityService()
-            .getMetadataFirstValue(this, MetadataSchemaEnum.DC.getName(), "title", null, Item.ANY);
-        return value == null ? "" : value;
-    }
-
-    @Override
     public Integer getLegacyId() {
         return legacyId;
     }
 
-    private CommunityService getCommunityService() {
-        if (communityService == null) {
-            communityService = ContentServiceFactory.getInstance().getCommunityService();
-        }
-        return communityService;
-    }
-
-    /**
-     * return count of the community items
-     *
-     * @return int
-     */
-    public int countArchivedItems() {
-        try {
-            return communityService.countArchivedItems(this);
-        } catch (ItemCountException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }
