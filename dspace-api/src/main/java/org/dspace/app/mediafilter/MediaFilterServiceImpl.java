@@ -7,6 +7,9 @@
  */
 package org.dspace.app.mediafilter;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -19,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.tuple.Pair;
 import org.dspace.app.mediafilter.service.MediaFilterService;
@@ -350,14 +355,23 @@ public class MediaFilterServiceImpl implements MediaFilterService, InitializingB
         }
 
         logInfo("File: " + newName);
-
+        File srcFile;
         // start filtering of the bitstream, using try with resource to close all InputStreams properly
         try (
                 // get the source stream
                 InputStream srcStream = bitstreamService.retrieve(context, source);
+        ) {
+            BitstreamFormat format = bitstreamService.getFormat(context, source);
+            srcFile = inputStreamToTempFile(srcStream, source.getID().toString(), format.getExtensions().get(0));
+        }
+
+        // start filtering of the bitstream, using try with resource to close all InputStreams properly
+        try (
                 // filter the source stream to produce the destination stream
                 // this is the hard work, check for OutOfMemoryErrors at the end of the try clause.
-                InputStream destStream = formatFilter.getDestinationStream(item, srcStream, isVerbose);
+                InputStream destStream = formatFilter.getDestinationStream(
+                    item, FileUtils.openInputStream(srcFile), isVerbose
+                );
         ) {
             if (destStream == null) {
                 if (!isQuiet) {
@@ -412,6 +426,21 @@ public class MediaFilterServiceImpl implements MediaFilterService, InitializingB
         }
 
         return true;
+    }
+
+    public File inputStreamToTempFile(InputStream source, String prefix, String suffix) throws IOException {
+        File f = File.createTempFile(prefix, suffix);
+        f.deleteOnExit();
+        FileOutputStream fos = new FileOutputStream(f);
+
+        byte[] buffer = new byte[1024];
+        int len = source.read(buffer);
+        while (len != -1) {
+            fos.write(buffer, 0, len);
+            len = source.read(buffer);
+        }
+        fos.close();
+        return f;
     }
 
     @Override
