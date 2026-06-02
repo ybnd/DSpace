@@ -18,6 +18,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.persistence.PersistenceException;
+
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -38,6 +40,7 @@ import org.dspace.scripts.Process;
 import org.dspace.scripts.ProcessLogLevel;
 import org.dspace.scripts.factory.ScriptServiceFactory;
 import org.dspace.scripts.handler.DSpaceRunnableHandler;
+import org.dspace.scripts.service.RejectDuplicateProcess;
 import org.dspace.scripts.service.ProcessService;
 import org.dspace.utils.DSpace;
 import org.springframework.core.task.TaskExecutor;
@@ -79,6 +82,12 @@ public class RestDSpaceRunnableHandler implements DSpaceRunnableHandler {
             log.error("RestDSpaceRunnableHandler with ePerson: " + ePerson
                 .getEmail() + " for Script with name: " + scriptName +
                           " and parameters: " + parameters + " could nto be created", e);
+        } catch (PersistenceException e) {
+            if (ExceptionUtils.getRootCause(e).getMessage().contains("reject_duplicate_process")) {
+                throw new RejectDuplicateProcess(e);
+            } else {
+                throw e;
+            }
         } finally {
             if (context.isValid()) {
                 context.abort();

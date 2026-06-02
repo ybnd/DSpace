@@ -27,6 +27,7 @@ import org.dspace.authorize.AuthorizeException;
 import org.dspace.core.Context;
 import org.dspace.eperson.InvalidReCaptchaException;
 import org.dspace.orcid.exception.OrcidValidationException;
+import org.dspace.scripts.service.RejectDuplicateProcess;
 import org.dspace.services.ConfigurationService;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -110,6 +111,15 @@ public class DSpaceApiExceptionControllerAdvice extends ResponseEntityExceptionH
         throws IOException {
         sendErrorResponse(request, response, ex,
                           "An internal database error occurred", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler({
+        RejectDuplicateProcess.class
+    })
+    protected void handleConflictException(HttpServletRequest request, HttpServletResponse response, Exception ex)
+        throws IOException {
+        sendErrorResponse(request, response, ex,
+                          "The request was rejected due to a conflict", HttpServletResponse.SC_CONFLICT);
     }
 
     @ExceptionHandler(IOException.class)
